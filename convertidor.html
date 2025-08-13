@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Conversor de Imágenes a PDF</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Hoja de estilos -->
+    <style>
+        /* --- Estilos generales (tomados de tu archivo original) --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eaeaea;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding-top: 40px;
+        }
+
+        .container {
+            background: #fff;
+            padding: 25px;
+            margin: 15px;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 1.6rem;
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+
+        .logo {
+            width: 200px;
+            height: auto;
+            display: block;
+            margin: 0 auto 10px auto;
+            object-fit: contain;
+        }
+
+        /* --- Estilos específicos para la nueva aplicación --- */
+        #drop-area {
+            border: 2px dashed #007BFF;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        #drop-area.highlight {
+            background-color: #e6f2ff;
+            border-color: #0056b3;
+        }
+
+        #drop-area p {
+            margin: 0;
+            color: #555;
+            font-weight: 600;
+        }
+
+        #image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .image-preview {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .delete-image-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.8em;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            line-height: 1;
+            padding: 0;
+            z-index: 10;
+        }
+
+        #convert-btn {
+            background-color: #007BFF;
+            color: white;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+        
+        #convert-btn:hover {
+            background-color: #0056b3;
+        }
+
+        #convert-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 1.5rem;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer-text {
+            position: absolute;
+            bottom: 5px;
+            right: 15px;
+            color: #cccccc;
+            font-size: 0.75rem;
+            font-weight: bold;
+            opacity: 0.6;
+            text-transform: uppercase;
+            z-index: 1;
+        }
+
+        #message-box {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+        }
+
+        #message-box-content {
+            font-size: 1.1rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #message-box button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <img src="https://raw.githubusercontent.com/invs99/FF/refs/heads/SEGUNDA/freund1.png" alt="Logo Freund" class="logo" />
+        <h1>Convertidor de Imágenes a PDF</h1>
+
+        <!-- Área para arrastrar y soltar archivos -->
+        <div id="drop-area">
+            <p>Arrastra y suelta imágenes aquí, o haz clic para seleccionar.</p>
+            <input type="file" id="fileElem" multiple accept="image/jpeg, image/png" style="display: none;">
+        </div>
+
+        <!-- Contenedor para previsualizar las imágenes -->
+        <div id="image-preview-container"></div>
+        
+        <!-- Botón para generar el PDF -->
+        <button id="convert-btn" disabled>Convertir a PDF</button>
+
+        <div class="footer-text">Powered by Jonathann</div>
+    </div>
+
+    <!-- Indicador de carga -->
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Generando PDF...</p>
+    </div>
+
+    <!-- Mensaje de alerta personalizado -->
+    <div id="message-box" style="display:none;">
+        <div id="message-box-content"></div>
+        <button onclick="document.getElementById('message-box').style.display='none';">OK</button>
+    </div>
+
+    <!-- Librería jsPDF para la generación de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        const { jsPDF } = window.jspdf;
+
+        const dropArea = document.getElementById('drop-area');
+        const fileInput = document.getElementById('fileElem');
+        const previewContainer = document.getElementById('image-preview-container');
+        const convertBtn = document.getElementById('convert-btn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const messageBox = document.getElementById('message-box');
+        const messageBoxContent = document.getElementById('message-box-content');
+
+        let files = [];
+
+        // Función para mostrar mensajes personalizados
+        const showMessage = (message) => {
+            messageBoxContent.textContent = message;
+            messageBox.style.display = 'block';
+        };
+
+        // Previene el comportamiento por defecto del navegador para arrastrar y soltar
+        ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Resalta el área de soltar al arrastrar archivos sobre ella
+        ;['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.add('highlight'), false);
+        });
+
+        ;['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, () => dropArea.classList.remove('highlight'), false);
+        });
+
+        // Maneja la acción de soltar archivos
+        dropArea.addEventListener('drop', handleDrop, false);
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const newFiles = Array.from(dt.files).filter(file => file.type === 'image/jpeg' || file.type === 'image/png');
+            processFiles(newFiles);
+        }
+
+        // Abre el explorador de archivos al hacer clic en el área de soltar
+        dropArea.addEventListener('click', () => fileInput.click(), false);
+        fileInput.addEventListener('change', (e) => {
+            processFiles(Array.from(e.target.files));
+        });
+
+        function processFiles(newFiles) {
+            if (newFiles.length === 0) return;
+
+            files = files.concat(newFiles);
+            renderPreviews();
+            updateConvertButtonState();
+        }
+
+        function renderPreviews() {
+            previewContainer.innerHTML = '';
+            files.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.createElement('div');
+                    preview.className = 'image-preview';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.alt = file.name;
+                    preview.appendChild(img);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'x';
+                    deleteBtn.className = 'delete-image-btn';
+                    deleteBtn.title = 'Eliminar imagen';
+                    deleteBtn.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        files.splice(index, 1);
+                        renderPreviews();
+                        updateConvertButtonState();
+                    });
+                    preview.appendChild(deleteBtn);
+
+                    previewContainer.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function updateConvertButtonState() {
+            convertBtn.disabled = files.length === 0;
+        }
+
+        // Función para convertir a PDF
+        convertBtn.addEventListener('click', async () => {
+            if (files.length === 0) {
+                showMessage('Por favor, agrega al menos una imagen para convertir.');
+                return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+
+            try {
+                const doc = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 10;
+                
+                // Pre-carga el logo para no tener que hacerlo en cada iteración
+                const logoUrl = "https://raw.githubusercontent.com/invs99/FF/refs/heads/SEGUNDA/freund1.png";
+                const logoImg = new Image();
+                logoImg.src = logoUrl;
+                await new Promise(resolve => logoImg.onload = resolve);
+
+                // Define las dimensiones y posición del logo
+                const logoWidth = 20; // 20 mm de ancho
+                const logoHeight = (logoImg.height * logoWidth) / logoImg.width; // Mantiene el aspecto
+                const logoX = pageWidth - logoWidth - margin;
+                const logoY = pageHeight - logoHeight - margin;
+
+                // Mantiene el orden de las imágenes tal como se previsualizan
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    if (i > 0) {
+                        doc.addPage();
+                    }
+
+                    const imgData = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+
+                    const img = new Image();
+                    img.src = imgData;
+                    await new Promise(resolve => img.onload = resolve);
+
+                    const imgWidth = img.width;
+                    const imgHeight = img.height;
+
+                    // Escala la imagen para que se ajuste a la página manteniendo el aspecto
+                    const ratio = Math.min((pageWidth - margin * 2) / imgWidth, (pageHeight - margin * 2) / imgHeight);
+                    const scaledWidth = imgWidth * ratio;
+                    const scaledHeight = imgHeight * ratio;
+
+                    // Centra la imagen en la página
+                    const x = (pageWidth - scaledWidth) / 2;
+                    const y = (pageHeight - scaledHeight) / 2;
+                    
+                    doc.addImage(imgData, 'JPEG', x, y, scaledWidth, scaledHeight, '', 'FAST');
+
+                    // Añade el logo en la esquina inferior derecha
+                    doc.addImage(logoImg, 'PNG', logoX, logoY, logoWidth, logoHeight);
+                }
+
+                doc.save('imagenes_a_pdf.pdf');
+                loadingOverlay.style.display = 'none';
+                showMessage('PDF generado con éxito.');
+                
+                // Reinicia la aplicación después de guardar
+                files = [];
+                renderPreviews();
+                updateConvertButtonState();
+
+            } catch (error) {
+                console.error("Error al generar el PDF:", error);
+                loadingOverlay.style.display = 'none';
+                showMessage('Hubo un error al generar el PDF.');
+            }
+        });
+    </script>
+</body>
+</html>
