@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <title>Reporte de Impresores</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        /* --- Estilos generales --- */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #eaeaea;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding-top: 40px;
+        }
+        .container {
+            background: #fff;
+            padding: 25px;
+            padding-bottom: 40px; /* Ajustado para dar espacio al footer-text */
+            margin: 15px;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            /* Necesario para que el posicionamiento absoluto del footer-text funcione */
+        }
+        /* --- AJUSTES DE PORTADA WEB (NO PDF) --- */
+        .logo {
+            width: 200px;
+            /* Puedes ajustar este valor a tu gusto */
+            height: auto;
+            display: block;
+            margin: 0 auto 10px auto;
+            object-fit: contain;
+        }
+        h1 {
+            font-size: 1.6rem;
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+        /* --- FIN DE AJUSTES DE PORTADA WEB --- */
+
+        /* Formulario portada */
+        .form-group {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #333;
+            text-align: center;
+        }
+        input[type="text"] {
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            padding: 14px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            width: 100%;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Botones secciones */
+        #botonesSecciones {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .seccion-btn {
+            display: block;
+            background-color: #3498db; /* Azul por defecto */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 10px auto;
+            width: 90%;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 1.1rem;
+            text-transform: uppercase; /* Para que el texto sea en mayúsculas */
+            text-align: center;
+        }
+        .seccion-btn:hover {
+            background-color: #217dbb;
+        }
+        /* Estilo específico para el botón de OTRA AREA+ */
+        .seccion-btn-otra-area {
+            background-color: #FFA500;
+            /* Naranja */
+        }
+        .seccion-btn-otra-area:hover {
+            background-color: #CC8400;
+            /* Naranja más oscuro al pasar el ratón */
+        }
+        /* Estilo para las áreas dinámicas con nombre personalizado (celeste) */
+        .seccion-btn.dynamic-named {
+            background-color: #3498db; /* Celeste */
+        }
+        .seccion-btn.dynamic-named:hover {
+            background-color: #217dbb; /* Celeste más oscuro */
+        }
+
+        /* Estilos específicos para el input de "OTRA AREA" */
+        .custom-area-name-input {
+            width: calc(100% - 20px);
+            /* Ajusta el ancho para padding */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        /* Contenido sección desplegable */
+        .contenido-seccion {
+            background: #f3f6fb;
+            margin: 0 auto 25px auto;
+            max-width: 90%;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            display: none;
+            text-align: center;
+        }
+
+        /* Botones dentro de sección */
+        .btn-foto {
+            background-color: #2ecc71;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            margin: 8px 6px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn-foto:hover {
+            background-color: #27ae60;
+        }
+
+        /* Preview imágenes y botón de eliminar */
+        .preview-images {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 10px;
+        }
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+        .preview-images img {
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            object-fit: cover;
+        }
+        .delete-image-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.8em;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            line-height: 1;
+            padding: 0;
+            z-index: 10;
+        }
+        .delete-image-btn:hover {
+            background-color: #c0392b;
+        }
+
+        /* Contenedor para el botón "más" */
+        .add-photo-block {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            background-color: #f0f0f0;
+            border: 2px dashed #ccc;
+            cursor: pointer;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+        .add-photo-block:hover {
+            background-color: #e0e0e0;
+            border-color: #999;
+        }
+        .add-more-button {
+            background: none;
+            border: none;
+            color: #555;
+            font-size: 3em;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            font-weight: 300;
+        }
+        .add-more-button:hover {
+            color: #007BFF;
+        }
+
+        /* Comentario */
+        textarea {
+            width: 100%;
+            margin-top: 20px;
+            min-height: 80px;
+            padding: 10px;
+            resize: vertical;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Botón "Nuevo Reporte" */
+        #btnNuevoReporte {
+            background-color: #e74c3c;
+            margin-top: 20px;
+        }
+        #btnNuevoReporte:hover {
+            background-color: #c0392b;
+        }
+
+        /* Indicador de carga */
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-size: 1.5rem;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 9999;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #fff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Texto de "Powered by" */
+        .footer-text {
+            position: absolute;
+            bottom: 5px; /* Ajustado a 5px para pegarlo más a la orilla */
+            right: 15px;
+            color: #cccccc; /* Gris muy claro */
+            font-size: 0.75rem;
+            /* Tamaño de fuente más pequeño */
+            font-weight: bold;
+            opacity: 0.6; /* Difuminado */
+            text-transform: uppercase;
+            z-index: 1;
+        }
+
+        /* Responsive */
+        @media (max-width: 420px) {
+            .seccion-btn, .btn-foto {
+                width: 95%;
+                font-size: 1rem;
+            }
+            .preview-images img, .add-photo-block {
+                max-width: 70px;
+                max-height: 70px;
+                width: 70px;
+                height: 70px;
+            }
+            .footer-text {
+                font-size: 0.65rem;
+                /* Ajuste para pantallas pequeñas */
+                bottom: 5px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainCover">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSroamFoZxhxDK8iAOsHT5NB7nFY9rlpPEr6w&s" alt="Logo Freund" class="logo" />
+        <h1>Bienvenido</h1>
+        <button id="btnReporteImpresores" class="seccion-btn" style="margin-top:20px;">REPORTE DE IMPRESORES</button>
+        <div class="footer-text">Powered by Jonathann</div>
+    </div>
+
+    <div class="container" id="portada" style="display:none;">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSroamFoZxhxDK8iAOsHT5NB7nFY9rlpPEr6w&s" alt="Logo Freund" class="logo" />
+        <h1>Reporte de Impresores</h1>
+        <form id="inicioForm">
+            <div class="form-group">
+                <label for="tienda">TIENDA / AREA</label>
+                <input type="text" id="tienda" name="tienda" required />
+            </div>
+            <div class="form-group">
+                <label for="persona">RESPONSABLE</label>
+                <input type="text" id="persona" name="persona" required />
+            </div>
+            <button type="submit">Comenzar</button>
+        </form>
+        <div class="footer-text">Powered by Jonathann</div>
+    </div>
+
+    <div class="container" id="mainApp" style="display:none; text-align:center;">
+        <div id="botonesSecciones"></div>
+
+        <button id="addOtraAreaBtn" class="seccion-btn seccion-btn-otra-area" type="button" style="margin-top: 20px;">OTRA ÁREA +</button>
+
+        <button id="generarPDF" style="margin-top:30px; background:#34495e;">Generar Reporte PDF</button>
+
+        <button id="btnNuevoReporte" type="button">Nuevo Reporte</button>
+    </div>
+
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Generando PDF...</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        const { jsPDF } = window.jspdf;
+
+        // Nuevas referencias a los elementos de la portada principal
+        const mainCover = document.getElementById("mainCover");
+        const btnReporteImpresores = document.getElementById("btnReporteImpresores");
+
+        const portada = document.getElementById("portada");
+        const mainApp = document.getElementById("mainApp");
+        const inicioForm = document.getElementById("inicioForm");
+        const botonesSecciones = document.getElementById("botonesSecciones");
+        const btnNuevoReporte = document.getElementById("btnNuevoReporte");
+        const generarPDFBtn = document.getElementById("generarPDF");
+        const loadingOverlay = document.getElementById("loadingOverlay");
+        const addOtraAreaBtn = document.getElementById("addOtraAreaBtn");
+
+        // Secciones fijas: 'OTRA AREA' se gestionará dinámicamente
+        const seccionesFijas = [
+            "Recepción",
+            "Sala de Recibo",
+            "Eléctrico",
+            "Herrajes",
+            "Pintura",
+            "Fontanería",
+            "Herramientas"
+        ];
+        // Array para almacenar los nombres de las secciones fijas y dinámicas
+        let todasLasSecciones = [];
+        let nextDynamicAreaId = 0; // Para asignar IDs únicos a las áreas dinámicas
+
+        const LOGO_URL = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSroamFoZxhxDK8iAOsHT5NB7nFY9rlpPEr6w&s";
+        let logoBase64 = null;
+        let logoOriginalWidth = 0;
+        let logoOriginalHeight = 0;
+
+        const loadLogoAsBase64 = () => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = "Anonymous";
+                img.onload = () => {
+                    logoOriginalWidth = img.width;
+                    logoOriginalHeight = img.height;
+
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    logoBase64 = canvas.toDataURL("image/png");
+                    console.log("Logo cargado y convertido a Base64 con éxito. Dimensiones originales:", logoOriginalWidth, "x", logoOriginalHeight);
+                    resolve();
+                };
+                img.onerror = (error) => {
+                    console.error("Error al cargar el logo para Base64. Esto puede ser un problema de CORS o la URL de la imagen no es accesible:", error);
+                    logoBase64 = null;
+                    logoOriginalWidth = 0;
+                    logoOriginalHeight = 0;
+                    reject(error);
+                };
+                img.src = LOGO_URL;
+            });
+        };
+
+        const initializeSectionData = () => {
+            // Inicializar solo las secciones fijas
+            seccionesFijas.forEach(nombre => {
+                const key = "seccionData_" + nombre;
+                if (!localStorage.getItem(key)) {
+                    const data = { photos: [], comment: "" };
+                    localStorage.setItem(key, JSON.stringify(data));
+                }
+            });
+
+            // Cargar áreas dinámicas existentes
+            const savedDynamicAreas = JSON.parse(localStorage.getItem("dynamicAreas")) || [];
+            if (savedDynamicAreas.length > 0) {
+                // Encontrar el ID más alto para continuar desde ahí
+                nextDynamicAreaId = savedDynamicAreas.reduce((maxId, area) => Math.max(maxId, area.id + 1), 0);
+            }
+        };
+
+        const compressImage = (file, maxWidth, maxHeight, quality) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height = height * (maxWidth / width);
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width = width * (maxHeight / height);
+                            height = maxHeight;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    resolve(canvas.toDataURL('image/jpeg', quality));
+                    URL.revokeObjectURL(img.src);
+                };
+                img.onerror = error => reject(error);
+            });
+        };
+
+        // Función para crear y añadir una sección (fija o dinámica)
+        const createAndAppendSection = (nombre, isDynamic = false, dynamicId = null, activateImmediately = false) => {
+            const btn = document.createElement("button");
+            btn.className = "seccion-btn";
+            btn.type = "button";
+
+            const contenedor = document.createElement("div");
+            contenedor.className = "contenido-seccion";
+            contenedor.dataset.sectionName = nombre; // Identificar la sección por su nombre
+
+            let sectionKey = "seccionData_" + nombre;
+            let customNameInput = null;
+
+            if (isDynamic) {
+                sectionKey = `seccionData_OTRA AREA_${dynamicId}`; // Clave única para el localStorage
+
+                customNameInput = document.createElement("input");
+                customNameInput.type = "text";
+                customNameInput.placeholder = "Nombre de la otra área";
+                customNameInput.className = "custom-area-name-input";
+                customNameInput.dataset.sectionId = dynamicId; // Para identificar a qué área dinámica pertenece
+
+                // Cargar el nombre personalizado si existe y establecer el estilo inicial del botón
+                const savedCustomName = localStorage.getItem(`customAreaName_OTRA AREA_${dynamicId}`);
+                if (savedCustomName && savedCustomName.trim().length > 0) {
+                    customNameInput.value = savedCustomName;
+                    btn.textContent = savedCustomName.toUpperCase(); // Sin el "+"
+                    btn.classList.add("dynamic-named"); // Clase para el color celeste
+                    btn.classList.remove("seccion-btn-otra-area"); // Quitar clase naranja si ya tiene nombre
+                } else {
+                    btn.textContent = `OTRA AREA ${dynamicId}+`; // Nombre por defecto para nuevas dinámicas
+                    btn.classList.add("seccion-btn-otra-area"); // Clase naranja si no tiene nombre
+                    btn.classList.remove("dynamic-named");
+                }
+
+                // Actualizar el texto del botón y guardar en localStorage al escribir
+                customNameInput.addEventListener("input", () => {
+                    const newName = customNameInput.value.trim();
+                    if (newName) {
+                        btn.textContent = newName.toUpperCase();
+                        btn.classList.add("dynamic-named");
+                        btn.classList.remove("seccion-btn-otra-area");
+                    } else {
+                        btn.textContent = `OTRA AREA ${dynamicId}+`;
+                        btn.classList.add("seccion-btn-otra-area");
+                        btn.classList.remove("dynamic-named");
+                    }
+                    localStorage.setItem(`customAreaName_OTRA AREA_${dynamicId}`, newName);
+                });
+                contenedor.appendChild(customNameInput);
+            } else {
+                btn.textContent = nombre;
+            }
+
+            const inputCamara = document.createElement("input");
+            inputCamara.type = "file";
+            inputCamara.accept = "image/*";
+            inputCamara.capture = "environment";
+            inputCamara.style.display = "none";
+
+            const inputGaleria = document.createElement("input");
+            inputGaleria.type = "file";
+            inputGaleria.accept = "image/*";
+            inputGaleria.multiple = true;
+            inputGaleria.style.display = "none";
+
+            const btnCamara = document.createElement("button");
+            btnCamara.textContent = "Tomar Foto";
+            btnCamara.className = "btn-foto";
+            btnCamara.type = "button";
+            contenedor.appendChild(btnCamara);
+
+            const btnGaleria = document.createElement("button");
+            btnGaleria.textContent = "Agregar Foto";
+            btnGaleria.className = "btn-foto";
+            btnGaleria.type = "button";
+            contenedor.appendChild(btnGaleria);
+
+            const previewDiv = document.createElement("div");
+            previewDiv.className = "preview-images";
+            contenedor.appendChild(previewDiv);
+
+            const comentario = document.createElement("textarea");
+            comentario.placeholder = "Comentario para esta sección (opcional)";
+            contenedor.appendChild(comentario);
+
+            const loadSectionData = () => {
+                previewDiv.innerHTML = "";
+                const data = JSON.parse(localStorage.getItem(sectionKey));
+                if (data && data.photos) {
+                    data.photos.forEach((src) => {
+                        const imgContainer = document.createElement("div");
+                        imgContainer.className = "image-container";
+
+                        const img = document.createElement("img");
+                        img.src = src;
+                        img.alt = `Imagen de ${nombre}`;
+
+                        imgContainer.appendChild(img);
+
+                        const deleteBtn = document.createElement("button");
+                        deleteBtn.textContent = "x";
+                        deleteBtn.className = "delete-image-btn";
+                        deleteBtn.title = "Eliminar imagen";
+                        deleteBtn.addEventListener("click", () => {
+                            let currentData = JSON.parse(localStorage.getItem(sectionKey));
+                            currentData.photos = currentData.photos.filter(photoSrc => photoSrc !== src);
+                            localStorage.setItem(sectionKey, JSON.stringify(currentData));
+                            loadSectionData();
+                        });
+                        imgContainer.appendChild(deleteBtn);
+                        previewDiv.appendChild(imgContainer);
+                    });
+                }
+
+                const addMoreBlock = document.createElement("div");
+                addMoreBlock.className = "add-photo-block";
+                const addMoreBtn = document.createElement("button");
+                addMoreBtn.textContent = "+";
+                addMoreBtn.className = "add-more-button";
+                addMoreBtn.title = "Agregar más fotos";
+                addMoreBtn.addEventListener("click", () => {
+                    inputGaleria.click();
+                });
+                addMoreBlock.appendChild(addMoreBtn);
+                previewDiv.appendChild(addMoreBlock);
+
+                comentario.value = (data && data.comment) ? data.comment : "";
+            };
+            loadSectionData();
+
+            btn.addEventListener("click", () => {
+                const todas = document.querySelectorAll(".contenido-seccion");
+                todas.forEach(c => {
+                    if (c !== contenedor) c.style.display = "none";
+                });
+
+                if (contenedor.style.display === "block") {
+                    contenedor.style.display = "none";
+                } else {
+                    contenedor.style.display = "block";
+                }
+                if (contenedor.style.display === "block") {
+                    contenedor.scrollIntoView({ behavior: "smooth" });
+                }
+            });
+
+            btnCamara.addEventListener("click", () => {
+                inputCamara.click();
+            });
+            btnGaleria.addEventListener("click", () => {
+                inputGaleria.click();
+            });
+
+            const saveImages = async (files) => {
+                let currentData = JSON.parse(localStorage.getItem(sectionKey));
+                if (!currentData) {
+                    currentData = { photos: [], comment: "" };
+                }
+
+                const compressedImages = [];
+                for (let file of files) {
+                    try {
+                        const compressedBase64 = await compressImage(file, 800, 800, 0.7);
+                        compressedImages.push(compressedBase64);
+                    } catch (error) {
+                        console.error("Error al comprimir la imagen:", file.name, error);
+                        alert(`No se pudo procesar la imagen ${file.name}. Intenta con otra.`);
+                    }
+                }
+
+                currentData.photos = currentData.photos.concat(compressedImages);
+                try {
+                    localStorage.setItem(sectionKey, JSON.stringify(currentData));
+                    loadSectionData();
+                } catch (e) {
+                    if (e.name === 'QuotaExceededError') {
+                        alert('¡El almacenamiento está lleno! No se pueden añadir más fotos. Elimina algunas fotos existentes o inicia un nuevo reporte.');
+                    } else {
+                        console.error('Error al guardar en localStorage:', e);
+                        alert('Ocurrió un error al guardar las fotos.');
+                    }
+                }
+            };
+
+            inputCamara.addEventListener("change", e => {
+                if (e.target.files.length > 0) {
+                    saveImages(e.target.files);
+                    inputCamara.value = "";
+                }
+            });
+            inputGaleria.addEventListener("change", e => {
+                if (e.target.files.length > 0) {
+                    saveImages(e.target.files);
+                    inputGaleria.value = "";
+                }
+            });
+
+            comentario.addEventListener("input", () => {
+                let currentData = JSON.parse(localStorage.getItem(sectionKey));
+                currentData.comment = comentario.value;
+                localStorage.setItem(sectionKey, JSON.stringify(currentData));
+            });
+
+            botonesSecciones.appendChild(btn);
+            botonesSecciones.appendChild(contenedor);
+
+            // Añadir al array de todas las secciones (para el PDF)
+            todasLasSecciones.push({ name: nombre, isDynamic: isDynamic, dynamicId: dynamicId });
+
+            // Desplegar inmediatamente si se especifica
+            if (activateImmediately) {
+                const todas = document.querySelectorAll(".contenido-seccion");
+                todas.forEach(c => {
+                    if (c !== contenedor) c.style.display = "none";
+                });
+                contenedor.style.display = "block";
+                contenedor.scrollIntoView({ behavior: "smooth" });
+            }
+            return { btn: btn, contenedor: contenedor }; // Devuelve los elementos creados
+        };
+
+
+        // Función para añadir una nueva sección de "OTRA AREA" dinámicamente
+        const addDynamicAreaSection = () => {
+            const dynamicAreaName = `OTRA AREA_${nextDynamicAreaId}`;
+            const key = "seccionData_" + dynamicAreaName;
+            const data = { photos: [], comment: "" };
+            localStorage.setItem(key, JSON.stringify(data));
+
+            // Guardar el nuevo ID de área dinámica
+            let savedDynamicAreas = JSON.parse(localStorage.getItem("dynamicAreas")) || [];
+            savedDynamicAreas.push({ id: nextDynamicAreaId, name: dynamicAreaName });
+            localStorage.setItem("dynamicAreas", JSON.stringify(savedDynamicAreas));
+
+            const { btn: newBtn, contenedor: newContenedor } = createAndAppendSection(dynamicAreaName, true, nextDynamicAreaId, true);
+            nextDynamicAreaId++; // Incrementar para el próximo
+
+            // Enfocar el input de nombre personalizado en la nueva sección
+            const customInput = newContenedor.querySelector('.custom-area-name-input');
+            if (customInput) {
+                customInput.focus();
+            }
+        };
+
+        // Event Listener para el botón "Reporte de Impresores" en la portada principal
+        btnReporteImpresores.addEventListener("click", () => {
+            mainCover.style.display = "none";
+            portada.style.display = "block";
+        });
+
+
+        // Event Listener para el formulario de inicio
+        inicioForm.addEventListener("submit", async e => {
+            e.preventDefault();
+            const tienda = document.getElementById("tienda").value.trim();
+            const persona = document.getElementById("persona").value.trim();
+            if (!tienda || !persona) {
+                alert("Por favor completa todos los campos.");
+                return;
+            }
+            localStorage.setItem("tienda", tienda);
+            localStorage.setItem("persona", persona);
+
+            initializeSectionData(); // Esto carga las áreas dinámicas existentes
+
+            document.getElementById("tienda").value = localStorage.getItem("tienda") || "";
+            document.getElementById("persona").value = localStorage.getItem("persona") || "";
+
+            portada.style.display = "none";
+            mainApp.style.display = "block";
+
+            botonesSecciones.innerHTML = ""; // Limpiar secciones anteriores
+            todasLasSecciones = []; // Resetear para construir la lista completa
+
+            // Crear secciones fijas
+            seccionesFijas.forEach(nombre => createAndAppendSection(nombre));
+
+            // Cargar y crear secciones dinámicas existentes
+            const savedDynamicAreas = JSON.parse(localStorage.getItem("dynamicAreas")) || [];
+            savedDynamicAreas.forEach(area => {
+                createAndAppendSection(area.name, true, area.id);
+            });
+        });
+
+        // Event Listener para el botón "AGREGAR OTRA ÁREA +"
+        addOtraAreaBtn.addEventListener("click", addDynamicAreaSection);
+
+
+        btnNuevoReporte.addEventListener("click", () => {
+            if (confirm("¿Estás seguro de que quieres iniciar un nuevo reporte? Todos los datos actuales se borrarán.")) {
+                // Eliminar datos de secciones fijas
+                seccionesFijas.forEach(nombre => {
+                    localStorage.removeItem("seccionData_" + nombre);
+                });
+
+                // Eliminar datos de secciones dinámicas
+                const savedDynamicAreas = JSON.parse(localStorage.getItem("dynamicAreas")) || [];
+                savedDynamicAreas.forEach(area => {
+                    localStorage.removeItem(`seccionData_OTRA AREA_${area.id}`);
+                    localStorage.removeItem(`customAreaName_OTRA AREA_${area.id}`); // Borrar el nombre personalizado de cada dinámica
+                });
+                localStorage.removeItem("dynamicAreas"); // Eliminar el registro de áreas dinámicas
+
+                localStorage.removeItem("tienda");
+                localStorage.removeItem("persona");
+
+                document.getElementById("tienda").value = "";
+                document.getElementById("persona").value = "";
+
+                mainApp.style.display = "none";
+                portada.style.display = "none"; // Asegúrate de que portada también se oculte
+                mainCover.style.display = "block"; // Volver a la portada principal
+                botonesSecciones.innerHTML = "";
+                todasLasSecciones = []; // Resetear el array de secciones
+                nextDynamicAreaId = 0; // Resetear el contador de IDs dinámicos
+            }
+        });
+
+        const addHeaderAndFooter = (doc, pageNumber) => {
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 15;
+            const textPadding = 5;
+            const headerBottomLineY = 30;
+
+            let finalLogoHeight = 0;
+            const logoStart_Y = 10;
+
+            if (logoBase64 && logoOriginalWidth > 0 && logoOriginalHeight > 0) {
+                const pdfLogoWidth = 30;
+                const calculatedLogoHeight = (pdfLogoWidth / logoOriginalWidth) * logoOriginalHeight;
+                const maxLogoHeight = 15;
+                finalLogoHeight = Math.min(calculatedLogoHeight, maxLogoHeight);
+                doc.addImage(logoBase64, 'PNG', margin, logoStart_Y, pdfLogoWidth, finalLogoHeight);
+            } else {
+                console.warn("No se pudo dibujar el logo en el encabezado porque logoBase64 es nulo o las dimensiones originales no se capturaron. Revisa la consola para más detalles.");
+                logoBase64 = null;
+                logoOriginalWidth = 0;
+                logoOriginalHeight = 0;
+            }
+
+            doc.setFontSize(18);
+            doc.setTextColor("#2c3e50");
+            const titleY = logoStart_Y + (finalLogoHeight / 2) + 3;
+
+            // Establecer la fuente a negrita antes de dibujar el texto del título
+            doc.setFont("helvetica", "bold");
+            // Centrar el título: usa pageWidth / 2 como coordenada X y 'center' como alineación
+            doc.text("REPORTE DE IMPRESORES", pageWidth / 2, titleY, { align: "center" });
+            // Restablecer la fuente a normal después del título para el resto del contenido
+            doc.setFont("helvetica", "normal");
+
+
+            doc.setDrawColor(150);
+            doc.setLineWidth(0.3);
+            doc.line(margin, headerBottomLineY, pageWidth - margin, headerBottomLineY);
+
+            doc.setFontSize(10);
+            doc.setTextColor(150);
+            doc.text(`Página ${pageNumber}`, pageWidth - margin, pageHeight - 10, { align: "right" });
+            doc.setTextColor(0);
+            doc.setDrawColor(0);
+        };
+
+        generarPDFBtn.addEventListener("click", async () => {
+            const tienda = localStorage.getItem("tienda") || "Sin Nombre Tienda";
+            const persona = localStorage.getItem("persona") || "Sin Nombre Responsable";
+            const currentDate = new Date().toLocaleDateString('es-ES', {
+                year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            let hasContent = false;
+            // Verificar contenido para secciones fijas
+            for (const section of seccionesFijas) {
+                const sectionData = JSON.parse(localStorage.getItem("seccionData_" + section));
+                if (sectionData && (sectionData.photos.length > 0 || sectionData.comment.trim().length > 0)) {
+                    hasContent = true;
+                    break;
+                }
+            }
+            // Verificar contenido para secciones dinámicas
+            if (!hasContent) {
+                const savedDynamicAreas = JSON.parse(localStorage.getItem("dynamicAreas")) || [];
+                for (const area of savedDynamicAreas) {
+                    const sectionData = JSON.parse(localStorage.getItem(`seccionData_OTRA AREA_${area.id}`));
+                    if (sectionData && (sectionData.photos.length > 0 || sectionData.comment.trim().length > 0)) {
+                        hasContent = true;
+                        break;
+                    }
+                }
+            }
+
+
+            if (!hasContent) {
+                alert("No hay datos (fotos o comentarios) para generar el reporte. Por favor, añada contenido a alguna sección.");
+                return;
+            }
+
+            loadingOverlay.style.display = 'flex';
+            try {
+                await loadLogoAsBase64();
+            }
+            catch (error) {
+                alert("No se pudo cargar el logo para el PDF. Se generará sin él. Por favor, verifica la URL del logo o tu conexión a internet. Si el problema persiste, es probable que la imagen tenga restricciones de seguridad (CORS).");
+                logoBase64 = null;
+                logoOriginalWidth = 0;
+                logoOriginalHeight = 0;
+            }
+
+            const doc = new jsPDF({
+                orientation: "portrait",
+                unit: "mm",
+                format: "a4",
+            });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const margin = 15;
+            const contentStartY = 35;
+
+            addHeaderAndFooter(doc, 1);
+
+            doc.setFontSize(14);
+            let currentY = contentStartY + 5;
+
+            doc.text(`Tienda / Area: ${tienda}`, margin, currentY);
+            currentY += 10;
+            doc.text(`Responsable: ${persona}`, margin, currentY);
+            currentY += 10;
+            doc.text(`Fecha del Reporte: ${currentDate}`, margin, currentY);
+            currentY += 20;
+
+            let pageCounter = 1;
+            let firstContentSectionDrawn = false;
+
+            // Recorrer TODAS las secciones (fijas y dinámicas)
+            for (const sectionInfo of todasLasSecciones) {
+                let sectionData;
+                let sectionNameForPdf;
+                let sectionKey;
+
+                if (sectionInfo.isDynamic) {
+                    sectionKey = `seccionData_OTRA AREA_${sectionInfo.dynamicId}`;
+                    sectionData = JSON.parse(localStorage.getItem(sectionKey));
+                    const customName = localStorage.getItem(`customAreaName_OTRA AREA_${sectionInfo.dynamicId}`);
+                    sectionNameForPdf = (customName && customName.trim().length > 0) ? customName.toUpperCase() : `OTRA AREA ${sectionInfo.dynamicId}`.toUpperCase();
+                } else {
+                    sectionKey = `seccionData_${sectionInfo.name}`;
+                    sectionData = JSON.parse(localStorage.getItem(sectionKey));
+                    sectionNameForPdf = sectionInfo.name.toUpperCase();
+                }
+
+                if (!sectionData || (sectionData.photos.length === 0 && sectionData.comment.trim().length === 0)) {
+                    continue; // Saltar secciones sin contenido
+                }
+
+                // Calcular altura del comentario primero
+                let commentBoxHeight = 0;
+                let commentTextLines = [];
+                if (sectionData.comment && sectionData.comment.trim().length > 0) {
+                    doc.setFontSize(12);
+                    const commentText = "Comentario: " + sectionData.comment;
+                    const commentBoxWidth = pageWidth - margin * 2;
+                    const padding = 5;
+                    commentTextLines = doc.splitTextToSize(commentText, commentBoxWidth - padding * 2);
+                    const textHeight = commentTextLines.length * 7;
+                    commentBoxHeight = textHeight + padding * 2;
+                }
+
+                // Determinar altura requerida para las imágenes
+                const imagesPerRow = 2;
+                const imgGap = 10;
+                let requiredImagesHeight = 0;
+                if (sectionData.photos.length > 0) {
+                    const numRows = Math.ceil(sectionData.photos.length / imagesPerRow);
+                    const estimatedImgHeight = 60; // Una estimación razonable
+                    requiredImagesHeight = (numRows * estimatedImgHeight) + ((numRows - 1) * imgGap);
+                }
+
+                // Verificar si la sección actual cabe en la página actual
+                if (firstContentSectionDrawn && (currentY + 20 + requiredImagesHeight + commentBoxHeight + 15 + margin > pageHeight)) {
+                    doc.addPage();
+                    pageCounter++;
+                    addHeaderAndFooter(doc, pageCounter);
+                    currentY = contentStartY;
+                } else if (!firstContentSectionDrawn) {
+                    firstContentSectionDrawn = true;
+                }
+
+                doc.setFontSize(18);
+                doc.setTextColor("#2c3e50");
+                doc.text(sectionNameForPdf, pageWidth / 2, currentY + 5, { align: "center" });
+                currentY += 20;
+
+                let calculatedImgWidth = 0;
+                let calculatedImgHeight = 0;
+                if (sectionData.photos.length > 0) {
+                    const availableSpaceForImages = pageHeight - currentY - margin - commentBoxHeight - (commentBoxHeight > 0 ? 15 : 0) - 5;
+                    const numRows = Math.ceil(sectionData.photos.length / imagesPerRow);
+                    const totalVerticalGap = (numRows - 1) * imgGap;
+                    calculatedImgHeight = (availableSpaceForImages - totalVerticalGap) / numRows;
+                    const maxPossibleWidthForTwoImages = (pageWidth - (margin * 2) - imgGap) / imagesPerRow;
+                    calculatedImgWidth = Math.min(calculatedImgHeight, maxPossibleWidthForTwoImages);
+                    calculatedImgHeight = calculatedImgWidth;
+                    if (calculatedImgWidth < 20) {
+                        console.warn("Imágenes demasiado pequeñas, ajustando a un mínimo de 20x20mm.");
+                        calculatedImgWidth = 20;
+                        calculatedImgHeight = 20;
+                    }
+                }
+
+                let imagesInCurrentRow = 0;
+                let currentRowStartX = 0;
+                let currentRowMaxHeight = 0;
+
+                for (let i = 0; i < sectionData.photos.length; i++) {
+                    const imgData = sectionData.photos[i];
+                    if (imagesInCurrentRow === 0 || imagesInCurrentRow >= imagesPerRow) {
+                        if (imagesInCurrentRow >= imagesPerRow) {
+                            currentY += currentRowMaxHeight + imgGap;
+                        }
+
+                        imagesInCurrentRow = 0;
+                        currentRowMaxHeight = 0;
+
+                        const numImagesForThisRow = Math.min(imagesPerRow, sectionData.photos.length - i);
+                        const totalRowWidth = (numImagesForThisRow * calculatedImgWidth) + ((numImagesForThisRow - 1) * imgGap);
+
+                        currentRowStartX = (pageWidth - totalRowWidth) / 2;
+                    }
+
+                    const imgX = currentRowStartX + (imagesInCurrentRow * (calculatedImgWidth + imgGap));
+                    try {
+                        const imgType = imgData.substring("data:image/".length, imgData.indexOf(";base64")).toUpperCase();
+                        doc.addImage(imgData, imgType, imgX, currentY, calculatedImgWidth, calculatedImgHeight);
+                    } catch (error) {
+                        console.warn(`No se pudo añadir una imagen en sección "${sectionNameForPdf}":`, error);
+                    }
+
+                    imagesInCurrentRow++;
+                    currentRowMaxHeight = Math.max(currentRowMaxHeight, calculatedImgHeight);
+                }
+
+                if (sectionData.photos.length > 0) {
+                    currentY += currentRowMaxHeight + 15;
+                }
+
+                if (sectionData.comment && sectionData.comment.trim().length > 0) {
+                    doc.setFontSize(12);
+                    const commentBoxWidth = pageWidth - margin * 2;
+                    const padding = 5;
+                    // Usar las líneas de comentario pre-calculadas
+                    doc.rect(margin, currentY, commentBoxWidth, commentBoxHeight, 'S');
+                    doc.text(commentTextLines, margin + padding, currentY + padding + 5, { align: "left" });
+                    currentY += commentBoxHeight + 15;
+                }
+            }
+
+            doc.save(`Reporte_${tienda.replace(/\s/g, "_")}_${new Date().toISOString().slice(0, 10)}.pdf`);
+            loadingOverlay.style.display = 'none';
+        });
+    </script>
+</body>
+</html>
